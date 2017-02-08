@@ -20,6 +20,13 @@
                     document.getElementById("requests").appendChild(inVal);
                 }
             }
+
+            exampleSocket.onclose = function () {
+                var inVal = document.createElement("div");
+                inVal.innerText = "WebSocket connection closed. Refresh the page to restart.";
+                inVal.className = "list-group-item alert alert-danger";
+                document.getElementById("requests").appendChild(inVal);
+            }
         }
     </script>
 </head>
