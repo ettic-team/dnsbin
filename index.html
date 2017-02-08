@@ -1,0 +1,39 @@
+<html>
+<head>
+    <title>DNSBin - The request.bin of DNS !</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" />
+
+    <script type="text/javascript">
+        window.onload = function() {
+            var exampleSocket = new WebSocket("ws://dns1.zhack.ca:8001/dnsbin");
+            exampleSocket.onmessage = function (data) {
+                var dt = JSON.parse(data.data);
+                if (dt.type == "token") {
+                    document.getElementById("token").innerHTML = "Subdomain to use : *." + dt.data + " <br /><br />Example : <br />mydatahere." + dt.data;
+                    document.getElementById("token").className = "alert alert-success";
+                }
+                if (dt.type == "request") {
+                    var inVal = document.createElement("div");
+                    inVal.innerText = dt.data;
+                    inVal.className = "list-group-item";
+                    document.getElementById("requests").appendChild(inVal);
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>DNSBin</h1>
+
+    <div id="token" class="alert alert-warning">Getting subdomain. Please wait ...</div>
+
+    <h2>Received data</h2>
+    <div id="requests" class="list-group"></div>
+
+</div>
+
+</body>
+</html>
