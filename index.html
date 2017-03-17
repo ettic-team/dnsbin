@@ -10,7 +10,7 @@
             exampleSocket.onmessage = function (data) {
                 var dt = JSON.parse(data.data);
                 if (dt.type == "token") {
-                    document.getElementById("token").innerHTML = "Subdomain to use : *." + dt.data + " <br /><br />Example : <br />mydatahere." + dt.data;
+                    document.getElementById("token").innerHTML = "Subdomain to use : *." + dt.data + ".d.zhack.ca <br /><br />Example : <br />mydatahere." + dt.data + ".d.zhack.ca";
                     document.getElementById("token").className = "alert alert-success";
                 }
                 if (dt.type == "request") {

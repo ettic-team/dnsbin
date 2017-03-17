@@ -1,7 +1,31 @@
 var dnsd = require('dnsd')
 var ws = require("nodejs-websocket")
 var crypto = require('crypto');
+var fs = require('fs');
 var map = {};
+
+function data2ip (data) {
+    var ip = "";
+    ip += (data[0] || "\x00").charCodeAt(0) + ".";
+    ip += (data[1] || "\x00").charCodeAt(0) + ".";
+    ip += (data[2] || "\x00").charCodeAt(0) + ".";
+    ip += (data[3] || "\x00").charCodeAt(0);
+    return ip;
+}
+
+function bin2hex (d) {
+    var hex, i;
+
+    if (d == "") { return "00"; }
+
+    var result = "";
+    for (i=0; i<d.length; i++) {
+        hex = d.charCodeAt(i).toString(16);
+        result += ("0"+hex).slice(-2);
+    }
+
+    return result
+}
 
 var server = ws.createServer(function (conn) {
     try {
@@ -9,13 +33,26 @@ var server = ws.createServer(function (conn) {
 
         crypto.randomBytes(10, function(err, buffer) {
             try {
-                var token = buffer.toString('hex');
-                map[token] = conn;
-                conn.sendText(JSON.stringify({"type" : "token", "data" : token + ".d.zhack.ca"}));
+                token = buffer.toString('hex');
+                map[token] = {"connection" : conn, "buffer" : "" };
+                conn.sendText(JSON.stringify({"type" : "token", "data" : token }));
             } catch (e) {
 
             }
         });
+
+        conn.on("text", function (data) {
+              try {
+                  data = JSON.parse(data);
+                  if (data.text) {
+                      if (map[token]["buffer"].length + data.text.length > 2048) {
+                          map[token]["connection"].sendText(JSON.stringify({"type":"error", "data" : "Maximum buffering is 2048 bytes."}));
+                          return;
+                      }
+                      map[token]["buffer"] += data.text;
+                  }
+              } catch (e) {}
+        })
 
         conn.on("close", function (code, reason) {
             try {
@@ -42,9 +79,29 @@ dnsd.createServer(function(req, res) {
             content = parts.slice(0, parts.length - 1).join(".");
         
             if (map[id]) {
-                map[id].sendText(JSON.stringify({"type" : "request", "data" : content }));
+                map[id]["connection"].sendText(JSON.stringify({"type" : "request", "data" : content }));
             }
-        }    
+
+            fs.appendFile("log.txt", "Data request : " + domain + "\n", function (err) {});
+        } else if (domain.endsWith(".i.zhack.ca")) {
+            domain = domain.substring(0, domain.length - 11);
+            parts = domain.split(".");
+            id = parts[parts.length - 1];
+            fs.appendFile("log.txt", "Input request : " + domain + "\n", function (err) {});
+
+            if (map[id]) {
+                buffer = map[id]["buffer"];
+
+                res.answer.push({ name: res.question[0].name, type:'CNAME', data: bin2hex(buffer.substr(0, 30)) + "." +  bin2hex(buffer.substr(30, 30))  + ".o.zhack.ca", 'ttl': 0 })
+                res.end();
+
+                map[id]["buffer"] = buffer.substr(60);
+                map[id]["connection"].sendText(JSON.stringify({"type" : "dataconsumed", "data" : map[id]["buffer"].length }));
+                return;
+            }
+        } else {
+            fs.appendFile("log.txt", "No match ! " + domain + "\n", function (err) {});
+        }   
 
         // Always return localhost
         res.end('127.0.0.1');
