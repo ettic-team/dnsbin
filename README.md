@@ -11,7 +11,7 @@ http://dnsbin.zhack.ca/
 
 ### DNS
 
-The current DNS setup that I have for the demo server is the following one. Do note that I did this with trial and error, so the setup may be overcomplicated or may hvae issues. If you are more knowledgeable feel free to open an issue. 
+The current DNS setup that I have for the demo server is the following one. Do note that I did this with trial and error, so the setup may be overcomplicated or may have issues. If you are more knowledgeable feel free to open an issue. 
 
  - Add a "A" record for the domain "dns1.zhack.ca" that points to "192.99.55.194".
  - Add a "A" record for the domain "ns1.zhack.ca" that points to "192.99.55.194".
