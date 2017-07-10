@@ -32,14 +32,18 @@ The client script requires ["dnspython"](https://github.com/rthalley/dnspython) 
 
 #### Example sending data
 
-> Outside machine : echo test12345 | python main.py -f- -d out -t-
+Outside machine
+> echo test12345 | python main.py -f- -d out -t-
 
-> Inside machine : python main.py -f- -d in -t TOKEN_THE_FIRST_COMMAND_GAVE_YOU
+Inside machine
+> python main.py -f- -d in -t TOKEN_THE_FIRST_COMMAND_GAVE_YOU
 
 #### Example receiving data
 
-> Outside machine : python main.py -f- -d in -t-
+Outside machine
+> python main.py -f- -d in -t-
 
-> Inside machine : echo test12345 | python main.py -f- -d out -t TOKEN_THE_FIRST_COMMAND_GAVE_YOU
+Inside machine
+> echo test12345 | python main.py -f- -d out -t TOKEN_THE_FIRST_COMMAND_GAVE_YOU
 
 
