@@ -20,7 +20,7 @@ The current DNS setup that I have for the demo server is the following one. Do n
 
 ### Web Hosting
 
-It's highly recommended to start the DNS receiver and WebSocket endpoint with the Node.JS module ("forever")[https://www.npmjs.com/package/forever].
+It's highly recommended to start the DNS receiver and WebSocket endpoint with the Node.JS module ["forever"](https://www.npmjs.com/package/forever).
 
 > forever start index.js
 
