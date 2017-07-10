@@ -29,3 +29,15 @@ For the frontend, the file "index.html" can be hosted on the webserver of your c
 ### Client
 
 The client script requires ["dnspython"](https://github.com/rthalley/dnspython) to be installed on both end. Whether you are sending or receiving data, you must first start the script on the machine that's outside of the restricted zone. The script will provide you with a unique token that you must pass when running the script on the machine that's inside of the restricted zone.
+
+#### Example sending data
+
+> Outside machine : echo test12345 | python main.py -f- -d out -t-
+> Inside machine : python main.py -f- -d in -t TOKEN_THE_FIRST_COMMAND_GAVE_YOU
+
+#### Example receiving data
+
+> Outside machine : python main.py -f- -d in -t-
+> Inside machine : echo test12345 | python main.py -f- -d out -t TOKEN_THE_FIRST_COMMAND_GAVE_YOU
+
+
