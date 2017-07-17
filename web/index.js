@@ -1,8 +1,10 @@
 var dnsd = require('dnsd')
-var ws = require("nodejs-websocket")
+var ws 	= require("nodejs-websocket")
 var crypto = require('crypto');
-var fs = require('fs');
+var fs 	= require('fs');
 var map = {};
+var target_domain = "zhack.ca";
+var prefixes = [".d.", ".i.", ".o."];
 
 function data2ip (data) {
     var ip = "";
@@ -71,9 +73,9 @@ dnsd.createServer(function(req, res) {
 
     try {
         var domain = res.question[0].name;
-
-        if (domain.endsWith(".d.zhack.ca")) {
-            domain = domain.substring(0, domain.length - 11);
+	
+        if (domain.endsWith(prefixes[0] + target_domain)) {
+            domain = domain.substring(0, domain.length - (prefixes[0] + target_domain).length);
             parts = domain.split(".");
             id = parts[parts.length - 1];
             content = parts.slice(0, parts.length - 1).join(".");
@@ -83,8 +85,8 @@ dnsd.createServer(function(req, res) {
             }
 
             fs.appendFile("log.txt", "Data request : " + domain + "\n", function (err) {});
-        } else if (domain.endsWith(".i.zhack.ca")) {
-            domain = domain.substring(0, domain.length - 11);
+        } else if (domain.endsWith(prefixes[1] + target_domain)) {
+            domain = domain.substring(0, domain.length - (prefixes[1] + target_domain));
             parts = domain.split(".");
             id = parts[parts.length - 1];
             fs.appendFile("log.txt", "Input request : " + domain + "\n", function (err) {});
@@ -92,7 +94,7 @@ dnsd.createServer(function(req, res) {
             if (map[id]) {
                 buffer = map[id]["buffer"];
 
-                res.answer.push({ name: res.question[0].name, type:'CNAME', data: bin2hex(buffer.substr(0, 30)) + "." +  bin2hex(buffer.substr(30, 30))  + ".o.zhack.ca", 'ttl': 0 })
+                res.answer.push({ name: res.question[0].name, type:'CNAME', data: bin2hex(buffer.substr(0, 30)) + "." +  bin2hex(buffer.substr(30, 30))  + prefixes[2] + target_domain, 'ttl': 0 })
                 res.end();
 
                 map[id]["buffer"] = buffer.substr(60);
