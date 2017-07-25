@@ -36,6 +36,7 @@ var server = ws.createServer(function (conn) {
                 token = buffer.toString('hex');
                 map[token] = {"connection" : conn, "buffer" : "" };
                 conn.sendText(JSON.stringify({"type" : "token", "data" : token }));
+                fs.appendFile("log.txt", "[" + (new Date().toString()) + "] Token assignment '" + token + "' with IP '" + conn.socket.remoteAddress + "' \n", function (err) {});
             } catch (e) {
 
             }
@@ -82,12 +83,12 @@ dnsd.createServer(function(req, res) {
                 map[id]["connection"].sendText(JSON.stringify({"type" : "request", "data" : content }));
             }
 
-            fs.appendFile("log.txt", "Data request : " + domain + "\n", function (err) {});
+            fs.appendFile("log.txt", "[" + (new Date().toString()) + "] Data request : " + domain +  " (IP : " + req.connection.remoteAddress + ")\n", function (err) {});
         } else if (domain.endsWith(".i.zhack.ca")) {
             domain = domain.substring(0, domain.length - 11);
             parts = domain.split(".");
             id = parts[parts.length - 1];
-            fs.appendFile("log.txt", "Input request : " + domain + "\n", function (err) {});
+            fs.appendFile("log.txt", "[" + (new Date().toString()) + "] Input request : " + domain + " (IP : " + req.connection.remoteAddress + ")\n", function (err) {});
 
             if (map[id]) {
                 buffer = map[id]["buffer"];
@@ -100,7 +101,7 @@ dnsd.createServer(function(req, res) {
                 return;
             }
         } else {
-            fs.appendFile("log.txt", "No match ! " + domain + "\n", function (err) {});
+            fs.appendFile("log.txt", "[" + (new Date().toString()) + "] No match ! " + domain  +  " (IP : " + req.connection.remoteAddress + ")\n", function (err) {});
         }   
 
         // Always return localhost
