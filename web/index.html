@@ -6,27 +6,93 @@
 
     <script type="text/javascript">
         window.onload = function() {
-            var exampleSocket = new WebSocket("ws://dns1.zhack.ca:8001/dnsbin");
-            exampleSocket.onmessage = function (data) {
-                var dt = JSON.parse(data.data);
-                if (dt.type == "token") {
-                    document.getElementById("token").innerHTML = "Subdomain to use : *." + dt.data + ".d.zhack.ca <br /><br />Example : <br />mydatahere." + dt.data + ".d.zhack.ca";
-                    document.getElementById("token").className = "alert alert-success";
-                }
-                if (dt.type == "request") {
-                    var inVal = document.createElement("div");
-                    inVal.innerText = dt.data;
-                    inVal.className = "list-group-item";
-                    document.getElementById("requests").appendChild(inVal);
+            var socketConnection = new WebSocket("ws://dns1.zhack.ca:8001/dnsbin");
+            var restoreInProgress = false;
+            var tempToken;
+
+            function showInformation(dt) {
+                document.getElementById("token").innerHTML = 
+                    "Subdomain to use : *." + dt.data + ".d.zhack.ca <br /><br />" + 
+                    "Example : <br />mydatahere." + dt.data + ".d.zhack.ca";
+                document.getElementById("token").className = "alert alert-success";
+                window.location = "#master=" + dt.master;
+            }
+
+            function addReceivedMessage(dt) {
+                var inVal = document.createElement("div");
+                inVal.innerText = dt.data;
+                inVal.className = "list-group-item";
+                document.getElementById("requests").appendChild(inVal);
+            }
+
+            function getMasterFromLocation() {
+                var data = unescape(window.location.hash.substr(1));
+                var parts = data.split("=");
+
+                if (parts[0] == "master") {
+                    return parts[1];               
                 }
             }
 
-            exampleSocket.onclose = function () {
+            socketConnection.onmessage = function (data) {
+                var dt = JSON.parse(data.data);
+                
+                if (dt.type == "token") {
+                    if (!restoreInProgress) {
+                        showInformation(dt);
+                    } else {
+                        tempToken = dt;
+                    }
+                }
+
+                if (dt.type == "restore") {
+                    restoreInProgress = false;
+
+                    if (dt.err) {
+                        if (tempToken) {
+                            showInformation(tempToken);
+                        }
+                    } else {
+                        showInformation({ 
+                            "data"   : dt["subdomain"], 
+                            "master" : getMasterFromLocation()
+                        });
+
+                        for (var i=0; i<dt.data.length; i++) {
+                            addReceivedMessage(dt.data[i]);
+                        }
+                    }
+                }
+
+                if (dt.type == "request") {
+                    addReceivedMessage(dt);
+                }
+            };
+
+            socketConnection.onclose = function () {
                 var inVal = document.createElement("div");
                 inVal.innerText = "WebSocket connection closed. Refresh the page to restart.";
                 inVal.className = "list-group-item alert alert-danger";
                 document.getElementById("requests").appendChild(inVal);
-            }
+            };
+
+            socketConnection.onopen = function () {
+                // If we have a master token, this means the page was refreshed.
+                // We will try to get the data from that session.
+                var master = getMasterFromLocation();
+
+                if (master) {
+                    restoreInProgress = true;
+                    socketConnection.send(JSON.stringify({
+                        "restore" : true, 
+                        "master" : master
+                    }));
+
+                    document.getElementById("token").innerHTML = "Attempting to restore from master token ...";
+                    document.getElementById("token").className = "alert alert-warning";
+                }
+            };
+
         }
     </script>
 </head>
