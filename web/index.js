@@ -1,22 +1,25 @@
 // NodeJS dependencies
-var dnsd      = require('dnsd')
-var ws        = require("nodejs-websocket")
+var dnsd      = require('dnsd');
+var ws        = require("nodejs-websocket");
 var crypto    = require('crypto');
 var fs        = require('fs');
 
-// Configuration
-var config = require('./config')
+// Configuration & Custom module
+var config = require('./config');
+var persistence = require('./persistence');
 var map = {};
 
 function bin2hex (d) {
     var hex, i;
 
-    if (d == "") { return "00"; }
+    if (d == "") { 
+        return "00"; 
+    }
 
     var result = "";
     for (i=0; i<d.length; i++) {
         hex = d.charCodeAt(i).toString(16);
-        result += ("0"+hex).slice(-2);
+        result += ("0" + hex).slice(-2);
     }
 
     return result

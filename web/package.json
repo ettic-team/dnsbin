@@ -1,0 +1,28 @@
+{
+  "name": "dnsbin",
+  "version": "1.0.0",
+  "description": "The request.bin of DNS request",
+  "main": "index.js",
+  "dependencies": {
+    "dnsd": "^0.9.6",
+    "nodejs-websocket": "^1.7.1",
+    "sqlite3": "^3.1.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/HoLyVieR/dnsbin.git"
+  },
+  "keywords": [
+    "dns"
+  ],
+  "author": "Olivier Arteau",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HoLyVieR/dnsbin/issues"
+  },
+  "homepage": "https://github.com/HoLyVieR/dnsbin#readme"
+}
