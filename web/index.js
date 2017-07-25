@@ -1,17 +1,12 @@
-var dnsd = require('dnsd')
-var ws = require("nodejs-websocket")
-var crypto = require('crypto');
-var fs = require('fs');
-var map = {};
+// NodeJS dependencies
+var dnsd      = require('dnsd')
+var ws 	      = require("nodejs-websocket")
+var crypto    = require('crypto');
+var fs        = require('fs');
 
-function data2ip (data) {
-    var ip = "";
-    ip += (data[0] || "\x00").charCodeAt(0) + ".";
-    ip += (data[1] || "\x00").charCodeAt(0) + ".";
-    ip += (data[2] || "\x00").charCodeAt(0) + ".";
-    ip += (data[3] || "\x00").charCodeAt(0);
-    return ip;
-}
+// Configuration
+var config = require('./config')
+var map = {};
 
 function bin2hex (d) {
     var hex, i;
@@ -27,6 +22,12 @@ function bin2hex (d) {
     return result
 }
 
+function logData(message) {
+    fs.appendFile(config.logFile, "[" + (new Date().toString()) + "] " + message, function (err) {
+        console.error("Failed to log message ! ");    
+    });
+}
+
 var server = ws.createServer(function (conn) {
     try {
         var token;
@@ -36,7 +37,7 @@ var server = ws.createServer(function (conn) {
                 token = buffer.toString('hex');
                 map[token] = {"connection" : conn, "buffer" : "" };
                 conn.sendText(JSON.stringify({"type" : "token", "data" : token }));
-                fs.appendFile("log.txt", "[" + (new Date().toString()) + "] Token assignment '" + token + "' with IP '" + conn.socket.remoteAddress + "' \n", function (err) {});
+                logData("Token assignment '" + token + "' with IP '" + conn.socket.remoteAddress + "' \n");
             } catch (e) {
 
             }
@@ -66,42 +67,56 @@ var server = ws.createServer(function (conn) {
     
     }
 
-}).listen(8001);
+}).listen(config.websocketPort);
 
 dnsd.createServer(function(req, res) {
 
     try {
         var domain = res.question[0].name;
 
-        if (domain.endsWith(".d.zhack.ca")) {
-            domain = domain.substring(0, domain.length - 11);
+        var domainWithPrefixStandard = config.prefixes["standard"] + config.targetDomain;
+        var domainWithPrefixIn       = config.prefixes["in"] + config.targetDomain;
+	    var domainWithPrefixOut      = config.prefixes["out"] + config.targetDomain;
+
+        if (domain.endsWith(domainWithPrefixStandard)) {
+            domain = domain.substring(0, domain.length - domainWithPrefixStandard.length);
             parts = domain.split(".");
             id = parts[parts.length - 1];
             content = parts.slice(0, parts.length - 1).join(".");
         
-            if (map[id]) {
-                map[id]["connection"].sendText(JSON.stringify({"type" : "request", "data" : content }));
+            if (map.hasOwnProperty(id) && map[id]) {
+                map[id]["connection"].sendText(JSON.stringify({
+                    "type" : "request", 
+                    "data" : content 
+                }));
             }
 
-            fs.appendFile("log.txt", "[" + (new Date().toString()) + "] Data request : " + domain +  " (IP : " + req.connection.remoteAddress + ")\n", function (err) {});
-        } else if (domain.endsWith(".i.zhack.ca")) {
-            domain = domain.substring(0, domain.length - 11);
+            logData("Data request : " + domain +  " (IP : " + req.connection.remoteAddress + ")\n");
+        
+        } else if (domain.endsWith(domainWithPrefixIn)) {
+            domain = domain.substring(0, domain.length - domainWithPrefixIn.length);
             parts = domain.split(".");
             id = parts[parts.length - 1];
-            fs.appendFile("log.txt", "[" + (new Date().toString()) + "] Input request : " + domain + " (IP : " + req.connection.remoteAddress + ")\n", function (err) {});
+            logData("Input request : " + domain + " (IP : " + req.connection.remoteAddress + ")\n");
 
-            if (map[id]) {
+            if (map.hasOwnProperty(id) && map[id]) {
                 buffer = map[id]["buffer"];
 
-                res.answer.push({ name: res.question[0].name, type:'CNAME', data: bin2hex(buffer.substr(0, 30)) + "." +  bin2hex(buffer.substr(30, 30))  + ".o.zhack.ca", 'ttl': 0 })
+                res.answer.push({ 
+                    name: res.question[0].name, 
+                    type:'CNAME', 
+                    data: bin2hex(buffer.substr(0, 30)) + "." +  bin2hex(buffer.substr(30, 30))  + domainWithPrefixOut, 
+                    'ttl': 0 
+                });
                 res.end();
 
                 map[id]["buffer"] = buffer.substr(60);
                 map[id]["connection"].sendText(JSON.stringify({"type" : "dataconsumed", "data" : map[id]["buffer"].length }));
                 return;
             }
+        
         } else {
-            fs.appendFile("log.txt", "[" + (new Date().toString()) + "] No match ! " + domain  +  " (IP : " + req.connection.remoteAddress + ")\n", function (err) {});
+            logData("No match ! " + domain  +  " (IP : " + req.connection.remoteAddress + ")\n");
         }   
 
         // Always return localhost
