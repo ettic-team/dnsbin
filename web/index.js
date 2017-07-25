@@ -1,6 +1,6 @@
 // NodeJS dependencies
 var dnsd      = require('dnsd')
-var ws 	      = require("nodejs-websocket")
+var ws        = require("nodejs-websocket")
 var crypto    = require('crypto');
 var fs        = require('fs');
 
@@ -76,7 +76,7 @@ dnsd.createServer(function(req, res) {
 
         var domainWithPrefixStandard = config.prefixes["standard"] + config.targetDomain;
         var domainWithPrefixIn       = config.prefixes["in"] + config.targetDomain;
-	    var domainWithPrefixOut      = config.prefixes["out"] + config.targetDomain;
+        var domainWithPrefixOut      = config.prefixes["out"] + config.targetDomain;
 
         if (domain.endsWith(domainWithPrefixStandard)) {
             domain = domain.substring(0, domain.length - domainWithPrefixStandard.length);
