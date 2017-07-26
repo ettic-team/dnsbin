@@ -192,6 +192,6 @@ dnsd.createServer(function(req, res) {
     
     }
 
-}).listen(53, '0.0.0.0')
+}).listen(53, '0.0.0.0');
 
 console.log("Started !");

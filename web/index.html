@@ -4,16 +4,17 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" />
 
+    <script src="config.js"></script>
     <script type="text/javascript">
         window.onload = function() {
-            var socketConnection = new WebSocket("ws://dns1.zhack.ca:8001/dnsbin");
+            var socketConnection = new WebSocket(websocketUrl);
             var restoreInProgress = false;
             var tempToken;
 
             function showInformation(dt) {
                 document.getElementById("token").innerHTML = 
-                    "Subdomain to use : *." + dt.data + ".d.zhack.ca <br /><br />" + 
-                    "Example : <br />mydatahere." + dt.data + ".d.zhack.ca";
+                    "Subdomain to use : *." + dt.data + prefixes["standard"] + targetDomain + " <br /><br />" + 
+                    "Example : <br />mydatahere." + dt.data + prefixes["standard"] + targetDomain;
                 document.getElementById("token").className = "alert alert-success";
                 window.location = "#master=" + dt.master;
             }

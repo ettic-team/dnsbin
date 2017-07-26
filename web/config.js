@@ -1,6 +1,9 @@
 // The domain name on which you have configured your DNS setup.
 var targetDomain     = "zhack.ca";
 
+// Websocket URI that the client will use to connect
+var websocketUrl     = "ws://dns1.zhack.ca:8001/dnsbin";
+
 // Subdomain used for the service.
 var prefixes         = { 
 	"standard" : ".d.", 
@@ -24,8 +27,14 @@ var sqliteDatabase   = ":memory:";
 // will be deleted.
 var sqliteMaxEntry   = 100000;
 
+// Polyfill for when this file is loaded in the browser.
+if (!window.exports) {
+	exports = {};
+}
+
 exports.targetDomain = targetDomain;
 exports.prefixes = prefixes;
 exports.logFile = logFile;
 exports.websocketPort = websocketPort;
 exports.sqliteDatabase = sqliteDatabase;
+exports.websocketUrl = websocketUrl;
