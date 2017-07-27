@@ -90,8 +90,8 @@ var server = ws.createServer(function (conn) {
                 // saved data from a master token.
                 if (data.restore && data.master) {
                     persistence.restoreFromMaster(data.master, function (data) {
-                        // If the restore was succesful we readd the information to the map so 
-                        // that the connection that receive real-time data.
+                        // If the restore was succesful we add the information to the map so 
+                        // that the connection can receive real-time data.
                         if (!data.err) {
                             token = data.subdomain;
 

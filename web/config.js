@@ -28,7 +28,7 @@ var sqliteDatabase   = ":memory:";
 var sqliteMaxEntry   = 100000;
 
 // Polyfill for when this file is loaded in the browser.
-if (!window.exports) {
+if (typeof window !== "undefined" && !window.exports) {
 	exports = {};
 }
 
