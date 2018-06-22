@@ -14,23 +14,6 @@ ws_addr = "ws://dns1.zhack.ca:8001/dnsbin"  # DnsBin WebSocket Address
 site_addr = "http://dnsbin.zhack.ca/"  # URL
 subd_addr = ".d.zhack.ca"  # Subdomain
 
-def main():
-    print("""
-  ____            ____  _       
- |  _ \ _ __  ___| __ )(_)_ __  
- | | | | '_ \/ __|  _ \| | '_ \ 
- | |_| | | | \__ \ |_) | | | | |
- |____/|_| |_|___/____/|_|_| |_|
- The request.bin of DNS request
- @HoLyVieR             @KeyLo99\n""")
-    websocket.enableTrace(True)
-    ws = websocket.WebSocketApp(ws_addr,
-                                on_message=handle_message,
-                                on_error=on_error,
-                                on_close=on_close,
-                                on_open=on_open)
-    ws.run_forever()
-
 def handle_message(ws, message):
     try:
         json_data = json.loads(message)
@@ -64,6 +47,23 @@ def print_data(data):
 
 def gettime():
     return "[" + str(datetime.now().strftime("%H:%M:%S")) + "] "
+
+def main():
+    print("""
+  ____            ____  _       
+ |  _ \ _ __  ___| __ )(_)_ __  
+ | | | | '_ \/ __|  _ \| | '_ \ 
+ | |_| | | | \__ \ |_) | | | | |
+ |____/|_| |_|___/____/|_|_| |_|
+ The request.bin of DNS request
+ @HoLyVieR             @KeyLo99\n""")
+    websocket.enableTrace(True)
+    ws = websocket.WebSocketApp(ws_addr,
+                                on_message=handle_message,
+                                on_error=on_error,
+                                on_close=on_close,
+                                on_open=on_open)
+    ws.run_forever()
 
 if __name__ == "__main__":
     main()
